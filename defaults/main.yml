@@ -1,0 +1,21 @@
+---
+
+pgbackrest_owner: postgres
+pgbackrest_group: postgres
+pgbackrest_repo_path: "/var/lib/pgbackrest"
+pgbackrest_repo_retention_diff: "3"
+pgbackrest_repo_retention_full: "7"
+pgbackrest_stanzas: []
+  # - stanza: main
+  #   pg_path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+  #   schedules:
+  #     - backup_type: full
+  #       oncalendar: 'Weekly'
+
+pgbackrest_conf_extra: ""
+# pgbackrest_conf_extra: |
+#   repo1-cipher-pass=zWaf6XtpjIVZC5444yXB+cgFDFl7MxGlgkZSaoPvTGirhPygu4jOKOXf9LO4vjfO
+#   repo1-cipher-type=aes-256-cbc
+
+#   [global:archive-push]
+#   compress-level=3

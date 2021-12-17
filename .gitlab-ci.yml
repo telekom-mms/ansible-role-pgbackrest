@@ -1,0 +1,35 @@
+---
+image: registry.xait.no/templates/ansible-role:2.9
+
+variables:
+  NO_SUDO: 1
+  ANSIBLE_FORCE_COLOR: 'true'
+  PY_COLORS: '1'
+
+stages:
+ - lint
+ - test
+
+before_script:
+  - docker info
+  - python3 --version
+  - ansible --version
+  - molecule --version
+  # Required to pull other private repositories
+  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.xait.no/".insteadOf "git@gitlab.xait.no:"
+
+molecule:lint:
+  allow_failure: true
+  stage: lint
+  script:
+    - molecule lint
+    - molecule syntax
+
+molecule:test-ol8:
+  tags:
+    - docker
+  stage: test
+  variables:
+    MOLECULE_OL_VERSION: "8"
+  script:
+    - molecule test

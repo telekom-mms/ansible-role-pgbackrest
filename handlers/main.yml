@@ -1,0 +1,30 @@
+---
+
+- name: create stanzas
+  become: true
+  become_user: "{{ pgbackrest_owner }}"
+  command: pgbackrest --stanza={{ item.stanza }} stanza-create
+  loop: "{{ pgbackrest_stanzas }}"
+  loop_control:
+    label: "{{ item.stanza }}"
+  # molecule doesn't have postgres running
+  when: "'notest' not in ansible_skip_tags"
+
+- name: reload systemd
+  systemd:
+    daemon_reload: true
+
+- name: enable and start timers
+  systemd:
+    name: "{{ name }}"
+    state: started
+    enabled: true
+  vars:
+    # item.invocation.dest in check mode
+    name: "{{ item.dest | default(item.invocation.dest) | basename }}"
+  loop: "{{ __installed_timers.results }}"
+  loop_control:
+    label: "{{ name }}"
+  when:
+    - __installed_timers is defined
+    - item.dest is defined or item.invocation.dest is defined

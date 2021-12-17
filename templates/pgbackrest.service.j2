@@ -1,0 +1,10 @@
+
+[Unit]
+Description=PgBackRest for stanza {{ stanza }} [{{ backup_type }}]
+ConditionPathIsDirectory=/var/lib/pgsql/{{ postgresql_version }}/data
+
+[Service]
+Type=simple
+User={{ pgbackrest_owner }}
+Group={{ pgbackrest_group }}
+ExecStart=/usr/bin/pgbackrest --stanza={{ stanza }} --type={{ backup_type }} backup

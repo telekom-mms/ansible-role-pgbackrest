@@ -1,0 +1,12 @@
+# https://pgbackrest.org/configuration.html
+{% for item in pgbackrest_stanzas %}
+[{{ item.stanza }}]
+pg1-path={{ item.pg_path }}
+{% endfor %}
+
+[global]
+repo1-path={{ pgbackrest_repo_path }}
+repo1-retention-full={{ pgbackrest_repo_retention_full }}
+repo1-retention-diff={{ pgbackrest_repo_retention_diff }}
+
+{{ pgbackrest_conf_extra }}

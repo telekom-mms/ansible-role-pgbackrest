@@ -1,0 +1,58 @@
+---
+
+- name: Install pgbackrest
+  yum:
+    name: pgbackrest
+    state: present
+  tags: ["install"]
+
+- name: Ensure data path exists
+  file:
+    path: "{{ pgbackrest_repo_path }}"
+    owner: "{{ pgbackrest_owner }}"
+    group: "{{ pgbackrest_owner }}"
+    mode: 0700
+    state: directory
+
+- name: Copy pgbackrest config
+  template:
+    src: pgbackrest.conf.j2
+    dest: /etc/pgbackrest.conf
+    owner: "{{ pgbackrest_owner }}"
+    group: "{{ pgbackrest_owner }}"
+    mode: 0600
+  notify: create stanzas
+
+- name: Configure services
+  template:
+    src: pgbackrest.service.j2
+    dest: "/etc/systemd/system/pgbackrest-{{ stanza }}-{{ backup_type }}.service"
+    owner: root
+    group: root
+    mode: 0644
+  vars:
+    stanza: "{{ item.0.stanza }}"
+    backup_type: "{{ item.1.backup_type }}"
+  loop: "{{ pgbackrest_stanzas | subelements('schedules', skip_missing=True) }}"
+  loop_control:
+    label: "{{ stanza }} [{{ backup_type }}]"
+  notify: reload systemd
+
+- name: Configure timers
+  template:
+    src: pgbackrest.timer.j2
+    dest: "/etc/systemd/system/pgbackrest-{{ stanza }}-{{ backup_type }}.timer"
+    owner: root
+    group: root
+    mode: 0644
+  vars:
+    stanza: "{{ item.0.stanza }}"
+    backup_type: "{{ item.1.backup_type }}"
+    oncalendar: "{{ item.1.oncalendar }}"
+  loop: "{{ pgbackrest_stanzas | subelements('schedules', skip_missing=True) }}"
+  loop_control:
+    label: "{{ stanza }} [{{ backup_type }}]"
+  register: __installed_timers
+  notify:
+    - reload systemd
+    - enable and start timers

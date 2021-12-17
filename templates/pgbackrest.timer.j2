@@ -1,0 +1,9 @@
+[Unit]
+Description=PgBackRest Backup Job For Stanza {{ stanza }} [{{ backup_type }}]
+
+[Timer]
+OnCalendar={{ oncalendar }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

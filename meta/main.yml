@@ -1,0 +1,28 @@
+---
+
+dependencies: []
+# dependencies:
+# - name: xait.config_ssl_cert
+#   src: git@gitlab.xait.no:ansible-roles/xait_config_ssl_cert.git
+#   scm: git
+#   vars:
+#     ssl_cert: "/etc/pki/tls/certs/xait.no.crt"
+#     ssl_cert_key: "/etc/pki/tls/private/xait.no.key"
+#     ssl_cert_group: "root"
+
+galaxy_info:
+  role_name: xait_software_pgbackrest
+  namespace: xait
+  author: Andrei Costescu
+  description: xait_software_pgbackrest description
+  company: Xait AS
+
+  min_ansible_version: "2.9"
+
+  platforms:
+  - name: EL
+    versions:
+      - "8"
+
+  license: license (BSD-3-Clause)
+  galaxy_tags: []
