@@ -43,6 +43,7 @@ If using [Xait's postgres role](https://gitlab.xait.no/collab/xait_software_post
 
 ## Role Variables
 
+- `pgbackrest_create_repo_path` can be set to `false` when repo type is non-local (Azure blob)
 - `pgbackrest_stanzas` defines stanzas and (optional) scheduled backups
 
 ```yml
@@ -55,6 +56,20 @@ pgbackrest_stanzas:
         oncalendar: 'Weekly'
       - backup_type: diff
         oncalendar: 'Daily'
+```
+
+Example config for Azure blob storage:
+
+```yml
+pgbackrest_repo_path: "/{{ cluster_name }}-main"
+pgbackrest_create_repo_path: false
+pgbackrest_repo_retention_diff: "3"
+pgbackrest_repo_retention_full: "7"
+pgbackrest_conf_extra: |
+  repo1-type=azure
+  repo1-azure-account={{ cluster_name }}pgstorage
+  repo1-azure-container=pgbackrest
+  repo1-azure-key={{ azure_sa_key }}
 ```
 
 ## Example Playbook

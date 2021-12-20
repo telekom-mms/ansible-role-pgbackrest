@@ -13,6 +13,7 @@
     group: "{{ pgbackrest_owner }}"
     mode: 0700
     state: directory
+  when: pgbackrest_create_repo_path | bool
 
 - name: Copy pgbackrest config
   template:

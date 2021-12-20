@@ -2,6 +2,7 @@
 
 pgbackrest_owner: postgres
 pgbackrest_group: postgres
+pgbackrest_create_repo_path: true
 pgbackrest_repo_path: "/var/lib/pgbackrest"
 pgbackrest_repo_retention_diff: "3"
 pgbackrest_repo_retention_full: "7"
