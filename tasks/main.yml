@@ -22,7 +22,7 @@
     owner: "{{ pgbackrest_owner }}"
     group: "{{ pgbackrest_owner }}"
     mode: 0600
-  notify: create stanzas
+  notify: reconfigure pgbackrest
 
 - name: Configure services
   template:
@@ -38,6 +38,7 @@
   loop_control:
     label: "{{ stanza }} [{{ backup_type }}]"
   notify: reload systemd
+  when: not (pgbackrest_standby | bool)
 
 - name: Configure timers
   template:
@@ -57,3 +58,4 @@
   notify:
     - reload systemd
     - enable and start timers
+  when: not (pgbackrest_standby | bool)

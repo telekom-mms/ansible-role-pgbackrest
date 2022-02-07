@@ -39,11 +39,15 @@ max_wal_senders = 3
 wal_level = replica
 ```
 
+On the standby server(s), you might want to include `hot_standby = on` as well.
+
 If using [Xait's postgres role](https://gitlab.xait.no/collab/xait_software_postgres), you can add the above config in the `postgresql_extra_conf` variable.
 
 ## Role Variables
 
 - `pgbackrest_create_repo_path` can be set to `false` when repo type is non-local (Azure blob)
+- `pgbackrest_repo_path` required if not using standby mode
+- `pgbackrest_standby` enables standby mode, `pgbackrest_repo_host` is required
 - `pgbackrest_stanzas` defines stanzas and (optional) scheduled backups
 
 ```yml

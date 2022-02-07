@@ -5,8 +5,11 @@ pg1-path={{ item.pg_path }}
 {% endfor %}
 
 [global]
+{% if pgbackrest_standby | bool %}
+repo1-host={{ pgbackrest_repo_host }}
+{% else %}
 repo1-path={{ pgbackrest_repo_path }}
 repo1-retention-full={{ pgbackrest_repo_retention_full }}
 repo1-retention-diff={{ pgbackrest_repo_retention_diff }}
-
+{% endif %}
 {{ pgbackrest_conf_extra }}

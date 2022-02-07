@@ -3,6 +3,9 @@
 pgbackrest_owner: postgres
 pgbackrest_group: postgres
 pgbackrest_create_repo_path: true
+# https://pgbackrest.org/user-guide.html#replication
+pgbackrest_standby: false
+pgbackrest_repo_host: 'repository'
 pgbackrest_repo_path: "/var/lib/pgbackrest"
 pgbackrest_repo_retention_diff: "3"
 pgbackrest_repo_retention_full: "7"
