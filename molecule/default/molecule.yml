@@ -7,7 +7,7 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: "ol${MOLECULE_OL_VERSION:-8}"
+  - name: "backup_ol${MOLECULE_OL_VERSION:-8}"
     image: "oraclelinux:${MOLECULE_OL_VERSION:-8}"
     command: /sbin/init
     tmpfs:
@@ -17,12 +17,26 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     pre_build_image: true
+    groups: ["backup"]
+
+  - name: "stby_ol${MOLECULE_OL_VERSION:-8}"
+    image: "oraclelinux:${MOLECULE_OL_VERSION:-8}"
+    command: /sbin/init
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+    groups: ["standby"]
 provisioner:
   name: ansible
   inventory:
     group_vars:
       all:
         postgresql_version: ${MOLECULE_PG_VERSION:-"13"}
+      backup:
         pgbackrest_stanzas:
           - stanza: main
             pg_path: "/var/lib/pgsql/{{ postgresql_version }}/data"
@@ -33,6 +47,11 @@ provisioner:
                 oncalendar: 'Hourly'
           - stanza: test
             pg_path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+      standby:
+        pgbackrest_stanzas:
+          - stanza: main
+            pg_path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+        pgbackrest_standby: true
 verifier:
   name: ansible
 lint: |
