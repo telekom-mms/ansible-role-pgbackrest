@@ -1,5 +1,7 @@
 ---
 
+postgresql_version: 14
+
 pgbackrest_owner: postgres
 pgbackrest_group: postgres
 pgbackrest_create_repo_path: true

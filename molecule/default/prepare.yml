@@ -6,24 +6,3 @@
       yum:
         name: sudo
         state: present
-
-    - name: Install postgres repositories
-      yum_repository:
-        name: "{{ item.name }}"
-        description: "PostgreSQL {{ postgresql_version }} $releasever - $basearch"
-        baseurl: "{{ item.baseurl }}"
-        file: "{{ item.name }}"
-        gpgcheck: yes
-        gpgkey: https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG
-        enabled: yes
-      with_items:
-        - name: "pgdg-{{ postgresql_version }}"
-          baseurl: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-$releasever-$basearch"
-        - name: pgdg-common
-          baseurl: "https://download.postgresql.org/pub/repos/yum/common/redhat/rhel-$releasever-$basearch"
-
-    - name: Disable built-in Postgres module
-      command: /usr/bin/dnf -qy module disable postgresql
-      args:
-        warn: false
-      when: ansible_distribution_major_version | int >= 8
