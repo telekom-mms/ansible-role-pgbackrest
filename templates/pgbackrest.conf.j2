@@ -6,6 +6,7 @@ pg1-path={{ item.pg_path }}
 
 [global]
 {% if pgbackrest_standby | bool %}
+repo1-host-user={{ pgbackrest_owner }}
 repo1-host={{ pgbackrest_repo_host }}
 {% else %}
 repo1-path={{ pgbackrest_repo_path }}
