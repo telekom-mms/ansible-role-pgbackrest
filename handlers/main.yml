@@ -13,14 +13,27 @@
     - "'notest' not in ansible_skip_tags"
     - not (pgbackrest_standby | bool)
 
-- name: restore standby
-  listen: reconfigure pgbackrest
-  become: true
-  become_user: "{{ pgbackrest_owner }}"
-  command: pgbackrest --stanza={{ item.stanza }} --delta --type=standby restore
-  loop: "{{ pgbackrest_stanzas }}"
-  loop_control:
-    label: "{{ item.stanza }}"
+- block:
+    - name: stop database
+      listen: reconfigure pgbackrest
+      systemd:
+        name: "postgresql-{{ postgresql_version }}"
+        state: stopped
+
+    - name: restore standby
+      listen: reconfigure pgbackrest
+      become: true
+      become_user: "{{ pgbackrest_owner }}"
+      command: pgbackrest --stanza={{ item.stanza }} --delta --type=standby restore
+      loop: "{{ pgbackrest_stanzas }}"
+      loop_control:
+        label: "{{ item.stanza }}"
+
+    - name: start database
+      listen: reconfigure pgbackrest
+      systemd:
+        name: "postgresql-{{ postgresql_version }}"
+        state: started
   when:
     - "'notest' not in ansible_skip_tags"
     - pgbackrest_standby | bool
