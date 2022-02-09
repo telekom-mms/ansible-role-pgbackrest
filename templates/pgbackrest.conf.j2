@@ -2,6 +2,7 @@
 {% for item in pgbackrest_stanzas %}
 [{{ item.stanza }}]
 pg1-path={{ item.pg_path }}
+{{ item.extra | default('') }}
 {% endfor %}
 
 [global]

@@ -54,6 +54,8 @@ If using [Xait's postgres role](https://gitlab.xait.no/collab/xait_software_post
 pgbackrest_stanzas:
   - stanza: main
     pg_path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+    # extra is optional
+    extra: "recovery-option=primary_conninfo=host=172.17.0.5 port=5432 user=replicator"
     # schedules is optional
     schedules:
       - backup_type: full
