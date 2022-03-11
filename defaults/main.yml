@@ -4,24 +4,50 @@ postgresql_version: 14
 
 pgbackrest_owner: postgres
 pgbackrest_group: postgres
-pgbackrest_create_repo_path: true
 # https://pgbackrest.org/user-guide.html#replication
-pgbackrest_standby: false
-pgbackrest_repo_host: 'repository'
-pgbackrest_repo_path: "/var/lib/pgbackrest"
-pgbackrest_repo_retention_diff: "3"
-pgbackrest_repo_retention_full: "7"
+pgbackrest_restore_standby: false
+pgbackrest_timer_state: started
+pgbackrest_timer_enabled: true
+pgbackrest_global_config:
+  log-level-file: "debug"
+  log-level-console: "info"
+  start-fast: "y"
+  delta: "y"
 pgbackrest_stanzas: []
-  # - stanza: main
-  #   pg_path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+  # - name: backup
+  #   pg_config:
+  #     # Local pg server
+  #     - path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+  #     # Remote (if using backup-standby=y)
+  #     - path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+  #       host: "10.0.50.51"
+  #       host-user: "postgres"
   #   schedules:
   #     - backup_type: full
   #       oncalendar: 'Weekly'
+  #   extra:
+  #     backup-standby: "y"
+  #   # On standby
+  # - name: repl
+  #   pg_config:
+  #     - path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+  #   extra:
+  #     recovery-option: "primary_conninfo=host=10.0.50.11 user=replic_user port=5432"
 
 pgbackrest_conf_extra: ""
 # pgbackrest_conf_extra: |
-#   repo1-cipher-pass=zWaf6XtpjIVZC5444yXB+cgFDFl7MxGlgkZSaoPvTGirhPygu4jOKOXf9LO4vjfO
-#   repo1-cipher-type=aes-256-cbc
-
 #   [global:archive-push]
 #   compress-level=3
+
+pgbackrest_repos: []
+  # # Backup to Azure Blob
+  # - path: "/atl-main"
+  #   retention-full: "7"
+  #   retention-diff: "3"
+  #   type: azure
+  #   azure-account: atlpgstorage
+  #   azure-container: pgbackrest
+  #   azure-key: somelongkeyhere
+  # # replication
+  # - host: "10.0.50.11"
+  #   host-user: "postgres"

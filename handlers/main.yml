@@ -4,14 +4,14 @@
   listen: reconfigure pgbackrest
   become: true
   become_user: "{{ pgbackrest_owner }}"
-  command: pgbackrest --stanza={{ item.stanza }} stanza-create
+  command: pgbackrest --stanza={{ item.name }} stanza-create
   loop: "{{ pgbackrest_stanzas }}"
   loop_control:
-    label: "{{ item.stanza }}"
+    label: "{{ item.name }}"
   # molecule doesn't have postgres running
   when:
     - "'notest' not in ansible_skip_tags"
-    - not (pgbackrest_standby | bool)
+    - "'recovery-option' not in item.get('extra', {})"
 
 - block:
     - name: stop database
@@ -24,10 +24,12 @@
       listen: reconfigure pgbackrest
       become: true
       become_user: "{{ pgbackrest_owner }}"
-      command: pgbackrest --stanza={{ item.stanza }} --delta --type=standby restore
+      command: pgbackrest --stanza={{ item.name }} --repo={{ item.restore_repo | default('1') }} --delta --type=standby restore
       loop: "{{ pgbackrest_stanzas }}"
       loop_control:
-        label: "{{ item.stanza }}"
+        label: "{{ item.name }}"
+      when:
+        - "'recovery-option' in item.get('extra', {})"
 
     - name: start database
       listen: reconfigure pgbackrest
@@ -36,17 +38,19 @@
         state: started
   when:
     - "'notest' not in ansible_skip_tags"
-    - pgbackrest_standby | bool
+    # Only run if there's at least one stanza with recovery-option set
+    - pgbackrest_stanzas | json_query('[*].extra."recovery-option"')
+    - pgbackrest_restore_standby | bool
 
 - name: reload systemd
   systemd:
     daemon_reload: true
 
-- name: enable and start timers
+- name: configure pgbackrest timers
   systemd:
     name: "{{ name }}"
-    state: started
-    enabled: true
+    state: "{{ pgbackrest_timer_state }}"
+    enabled: "{{ pgbackrest_timer_enabled }}"
   vars:
     # item.invocation.dest in check mode
     name: "{{ item.dest | default(item.invocation.dest) | basename }}"

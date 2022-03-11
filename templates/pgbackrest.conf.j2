@@ -1,17 +1,26 @@
 # https://pgbackrest.org/configuration.html
-{% for item in pgbackrest_stanzas %}
-[{{ item.stanza }}]
-pg1-path={{ item.pg_path }}
-{{ item.extra | default('') }}
+[global]
+{% for r in pgbackrest_repos %}
+{% set i = loop.index %}
+{%   for k, v in r.items() %}
+repo{{ i }}-{{ k }}={{ v }}
+{%   endfor %}
+{% endfor %}
+{% for k, v in pgbackrest_global_config.items() %}
+{{ k }}={{ v }}
 {% endfor %}
 
-[global]
-{% if pgbackrest_standby | bool %}
-repo1-host-user={{ pgbackrest_owner }}
-repo1-host={{ pgbackrest_repo_host }}
-{% else %}
-repo1-path={{ pgbackrest_repo_path }}
-repo1-retention-full={{ pgbackrest_repo_retention_full }}
-repo1-retention-diff={{ pgbackrest_repo_retention_diff }}
-{% endif %}
+{% for stanza in pgbackrest_stanzas %}
+[{{ stanza.name }}]
+{%   for p in stanza.pg_config %}
+{%   set i = loop.index %}
+{%     for k, v in p.items() %}
+pg{{ i }}-{{ k }}={{ v }}
+{%     endfor %}
+{%   endfor %}
+{%   for k, v in stanza.get('extra', {}).items() %}
+{{ k }}={{ v }}
+{%   endfor %}
+
+{% endfor %}
 {{ pgbackrest_conf_extra }}

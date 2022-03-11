@@ -6,15 +6,6 @@
     state: present
   tags: ["install"]
 
-- name: Ensure data path exists
-  file:
-    path: "{{ pgbackrest_repo_path }}"
-    owner: "{{ pgbackrest_owner }}"
-    group: "{{ pgbackrest_owner }}"
-    mode: 0700
-    state: directory
-  when: pgbackrest_create_repo_path | bool
-
 - name: Copy pgbackrest config
   template:
     src: pgbackrest.conf.j2
@@ -27,35 +18,33 @@
 - name: Configure services
   template:
     src: pgbackrest.service.j2
-    dest: "/etc/systemd/system/pgbackrest-{{ stanza }}-{{ backup_type }}.service"
+    dest: "/etc/systemd/system/pgbackrest-{{ name }}-{{ backup_type }}.service"
     owner: root
     group: root
     mode: 0644
   vars:
-    stanza: "{{ item.0.stanza }}"
+    name: "{{ item.0.name }}"
     backup_type: "{{ item.1.backup_type }}"
   loop: "{{ pgbackrest_stanzas | subelements('schedules', skip_missing=True) }}"
   loop_control:
-    label: "{{ stanza }} [{{ backup_type }}]"
+    label: "{{ name }} [{{ backup_type }}]"
   notify: reload systemd
-  when: not (pgbackrest_standby | bool)
 
 - name: Configure timers
   template:
     src: pgbackrest.timer.j2
-    dest: "/etc/systemd/system/pgbackrest-{{ stanza }}-{{ backup_type }}.timer"
+    dest: "/etc/systemd/system/pgbackrest-{{ name }}-{{ backup_type }}.timer"
     owner: root
     group: root
     mode: 0644
   vars:
-    stanza: "{{ item.0.stanza }}"
+    name: "{{ item.0.name }}"
     backup_type: "{{ item.1.backup_type }}"
     oncalendar: "{{ item.1.oncalendar }}"
   loop: "{{ pgbackrest_stanzas | subelements('schedules', skip_missing=True) }}"
   loop_control:
-    label: "{{ stanza }} [{{ backup_type }}]"
+    label: "{{ name }} [{{ backup_type }}]"
   register: __installed_timers
   notify:
     - reload systemd
-    - enable and start timers
-  when: not (pgbackrest_standby | bool)
+    - configure pgbackrest timers

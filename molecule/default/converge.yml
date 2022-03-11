@@ -1,5 +1,43 @@
 ---
 - name: Converge
   hosts: all
+  vars:
+    pgbackrest_stanzas:
+      - name: backup
+        pg_config:
+          # Local pg server
+          - path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+          # Remote (if using backup-standby=y)
+          - path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+            host: "10.0.50.51"
+            host-user: "postgres"
+          - path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+            host: "10.0.50.52"
+            host-user: "postgres"
+        schedules:
+          - backup_type: full
+            oncalendar: 'Weekly'
+        extra:
+          backup-standby: "y"
+        # On standby
+      - name: repl
+        pg_config:
+          - path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+        extra:
+          recovery-option: "primary_conninfo=host=10.0.50.11 user=replic_user port=5432"
+    pgbackrest_repos:
+      # Backup to Azure Blob
+      - path: "/atl-main"
+        retention-full: "7"
+        retention-diff: "3"
+        type: azure
+        azure-account: atlpgstorage
+        azure-container: pgbackrest
+        azure-key: somelongkeyhere
+      - path: "/example"
+        user: "postgres"
+      # replication
+      - host: "10.0.50.11"
+        host-user: "postgres"
   roles:
     - xait_software_pgbackrest

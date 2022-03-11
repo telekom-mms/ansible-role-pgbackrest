@@ -33,7 +33,7 @@ ansible-galaxy install -r requirements.yml
 PostgreSQL must already be installed and running. You must also add the following to `postgresql.conf`
 
 ```ini
-archive_command = 'pgbackrest --stanza=main archive-push %p'
+archive_command = 'pgbackrest --stanza=<name> archive-push %p'
 archive_mode = on
 max_wal_senders = 3
 wal_level = replica
@@ -45,40 +45,107 @@ If using [Xait's postgres role](https://gitlab.xait.no/collab/xait_software_post
 
 ## Role Variables
 
-- `pgbackrest_create_repo_path` can be set to `false` when repo type is non-local (Azure blob)
-- `pgbackrest_repo_path` required if not using standby mode
-- `pgbackrest_standby` enables standby mode, `pgbackrest_repo_host` is required
-- `pgbackrest_stanzas` defines stanzas and (optional) scheduled backups
+- `pgbackrest_restore_standby` set to true to restore from a standby from the stanza with `recovery-option` set.
+- `pgbackrest_timer_state` set backup timer(s) state, defaults to `started`. Set this to `stopped` for standbys.
+- `pgbackrest_timer_enabled` set to `false` if running on standby.
+- `pgbackrest_conf_extra` raw text that is added at the end of the config file.
+- `pgbackrest_global_config` mapping of options that will be added to the `[global]` section, defaults to
+
+```yml
+pgbackrest_global_config:
+  log-level-file: "debug"
+  log-level-console: "info"
+  start-fast: "y"
+  delta: "y"
+```
+
+- `pgbackrest_stanzas` defines stanzas and (optional) scheduled backups, example below
 
 ```yml
 pgbackrest_stanzas:
-  - stanza: main
-    pg_path: "/var/lib/pgsql/{{ postgresql_version }}/data"
-    # extra is optional
-    extra: "recovery-option=primary_conninfo=host=172.17.0.5 port=5432 user=replicator"
-    # schedules is optional
+  - name: backup
+    pg_config:
+      # Local pg server
+      - path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+      # Remote (if using backup-standby=y)
+      - path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+        host: "10.0.50.51"
+        host-user: "postgres"
+      - path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+        host: "10.0.50.52"
+        host-user: "postgres"
     schedules:
       - backup_type: full
         oncalendar: 'Weekly'
-      - backup_type: diff
-        oncalendar: 'Daily'
+    extra:
+      backup-standby: "y"
+    # On standby
+  - name: repl
+    pg_config:
+      - path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+    extra:
+      recovery-option: "primary_conninfo=host=10.0.50.11 user=replic_user port=5432"
 ```
 
-Example config for Azure blob storage:
+- `pgbackrest_repos` list of repositories to configure (in global section)
+
+Example with repo1 being Azure blob storage and repo2 replication from primary server:
 
 ```yml
-pgbackrest_repo_path: "/{{ cluster_name }}-main"
-pgbackrest_create_repo_path: false
-pgbackrest_repo_retention_diff: "3"
-pgbackrest_repo_retention_full: "7"
-pgbackrest_conf_extra: |
-  repo1-type=azure
-  repo1-azure-account={{ cluster_name }}pgstorage
-  repo1-azure-container=pgbackrest
-  repo1-azure-key={{ azure_sa_key }}
+pgbackrest_repos:
+  # Backup to Azure Blob
+  - path: "/atl-main"
+    retention-full: "7"
+    retention-diff: "3"
+    type: azure
+    azure-account: atlpgstorage
+    azure-container: pgbackrest
+    azure-key: somelongkeyhere
+  - path: "/example"
+    user: "postgres"
+  # replication
+  - host: "10.0.50.11"
+    host-user: "postgres"
+```
+
+The above examples and default config result in `/etc/pgbackrest.conf` as follows:
+
+```ini
+[global]
+repo1-path=/atl-main
+repo1-retention-full=7
+repo1-retention-diff=3
+repo1-type=azure
+repo1-azure-account=atlpgstorage
+repo1-azure-container=pgbackrest
+repo1-azure-key=somelongkeyhere
+repo2-path=/example
+repo2-user=postgres
+repo3-host=10.0.50.11
+repo3-host-user=postgres
+log-level-file=debug
+log-level-console=info
+start-fast=y
+delta=y
+
+[backup]
+pg1-path=/var/lib/pgsql/13/data
+pg2-path=/var/lib/pgsql/13/data
+pg2-host=10.0.50.51
+pg2-host-user=postgres
+pg3-path=/var/lib/pgsql/13/data
+pg3-host=10.0.50.52
+pg3-host-user=postgres
+backup-standby=y
+
+[repl]
+pg1-path=/var/lib/pgsql/13/data
+recovery-option=primary_conninfo=host=10.0.50.11 user=replic_user port=5432
 ```
 
 ## Example Playbook
+
+This example is for a single server backed up to Azure blobs
 
 ```yml
 - hosts: servers
@@ -88,15 +155,27 @@ pgbackrest_conf_extra: |
     - role: xait_software_postgres
       vars:
         postgresql_extra_conf: |
-          archive_command = 'pgbackrest --stanza=main archive-push %p'
+          archive_command = 'pgbackrest --stanza=backup archive-push %p'
           archive_mode = on
           max_wal_senders = 3
           wal_level = replica
     - role: xait_software_pgbackrest
       vars:
+        pgbackrest_repos:
+          - path: "/atl-main"
+            retention-full: "7"
+            retention-diff: "3"
+            type: azure
+            azure-account: atlpgstorage
+            azure-container: pgbackrest
+            azure-key: somelongkeyhere
         pgbackrest_stanzas:
-          - stanza: main
-            pg_path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+          - name: backup
+            pg_config:
+              - path: "/var/lib/pgsql/{{ postgresql_version }}/data"
+            schedules:
+              - backup_type: full
+                oncalendar: 'Weekly'
 ```
 
 ## Author Information

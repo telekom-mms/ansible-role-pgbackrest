@@ -36,23 +36,6 @@ provisioner:
     group_vars:
       all:
         postgresql_version: ${MOLECULE_PG_VERSION:-"13"}
-      backup:
-        pgbackrest_stanzas:
-          - stanza: main
-            pg_path: "/var/lib/pgsql/{{ postgresql_version }}/data"
-            schedules:
-              - backup_type: full
-                oncalendar: 'Weekly'
-              - backup_type: diff
-                oncalendar: 'Hourly'
-          - stanza: test
-            pg_path: "/var/lib/pgsql/{{ postgresql_version }}/data"
-      standby:
-        pgbackrest_stanzas:
-          - stanza: main
-            pg_path: "/var/lib/pgsql/{{ postgresql_version }}/data"
-            extra: "recovery-option=primary_conninfo=host=172.17.0.5 port=5432 user=replicator"
-        pgbackrest_standby: true
 verifier:
   name: ansible
 lint: |
