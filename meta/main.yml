@@ -7,10 +7,10 @@ dependencies:
     version: v1.0.0
 
 galaxy_info:
-  role_name: xait_software_pgbackrest
+  role_name: xait_database_pgbackrest
   namespace: xait
   author: Andrei Costescu
-  description: xait_software_pgbackrest description
+  description: xait_database_pgbackrest description
   company: Xait AS
 
   min_ansible_version: "2.9"
