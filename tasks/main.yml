@@ -45,6 +45,22 @@
   loop_control:
     label: "{{ name }} [{{ backup_type }}]"
   register: __installed_timers
-  notify:
-    - reload systemd
-    - configure pgbackrest timers
+  notify: reload systemd
+
+- name: Flush handlers
+  meta: flush_handlers
+
+- name: Configure pgbackrest timers
+  systemd:
+    name: "{{ name }}"
+    state: "{{ 'started' if pgbackrest_timer_enabled else 'stopped' }}"
+    enabled: "{{ pgbackrest_timer_enabled }}"
+  vars:
+    # item.invocation.dest in check mode
+    name: "{{ item.dest | default(item.invocation.dest) | basename }}"
+  loop: "{{ __installed_timers.results }}"
+  loop_control:
+    label: "{{ name }}"
+  when:
+    - __installed_timers is defined
+    - item.dest is defined or item.invocation.dest is defined
