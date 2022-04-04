@@ -46,7 +46,6 @@ If using [Xait's postgres role](https://gitlab.xait.no/collab/xait_software_post
 ## Role Variables
 
 - `pgbackrest_restore_standby` set to true to restore from a standby from the stanza with `recovery-option` set.
-- `pgbackrest_timer_state` set backup timer(s) state, defaults to `started`. Set this to `stopped` for standbys.
 - `pgbackrest_timer_enabled` set to `false` if running on standby.
 - `pgbackrest_conf_extra` raw text that is added at the end of the config file.
 - `pgbackrest_global_config` mapping of options that will be added to the `[global]` section, defaults to

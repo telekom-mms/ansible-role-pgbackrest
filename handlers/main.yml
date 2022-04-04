@@ -49,7 +49,7 @@
 - name: configure pgbackrest timers
   systemd:
     name: "{{ name }}"
-    state: "{{ pgbackrest_timer_state }}"
+    state: "{{ if pgbackrest_timer_enabled 'started' else 'stopped' }}"
     enabled: "{{ pgbackrest_timer_enabled }}"
   vars:
     # item.invocation.dest in check mode

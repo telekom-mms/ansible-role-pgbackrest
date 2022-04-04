@@ -6,7 +6,6 @@ pgbackrest_owner: postgres
 pgbackrest_group: postgres
 # https://pgbackrest.org/user-guide.html#replication
 pgbackrest_restore_standby: false
-pgbackrest_timer_state: started
 pgbackrest_timer_enabled: true
 pgbackrest_global_config:
   log-level-file: "debug"
