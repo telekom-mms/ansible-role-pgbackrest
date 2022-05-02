@@ -3,4 +3,4 @@
 - name: xait.database_pg_repo
   src: git@gitlab.xait.no:ansible-roles/xait_database_pg_repo.git
   scm: git
-  version: v1.0.0
+  version: v1.1.0
