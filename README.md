@@ -53,7 +53,7 @@ If using [Xait's postgres role](https://gitlab.xait.no/collab/xait_software_post
 
 ```yml
 pgbackrest_global_config:
-  log-level-file: "debug"
+  log-level-file: "info"
   log-level-console: "info"
   start-fast: "y"
   delta: "y"
