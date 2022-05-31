@@ -4,6 +4,7 @@ postgresql_version: 14
 
 pgbackrest_owner: postgres
 pgbackrest_group: postgres
+pgbackrest_local_postgresql: "{{ 'pg' in group_names }}"
 # https://pgbackrest.org/user-guide.html#replication
 pgbackrest_restore_standby: false
 pgbackrest_timer_enabled: true
