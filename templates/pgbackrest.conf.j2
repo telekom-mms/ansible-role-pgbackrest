@@ -9,6 +9,16 @@ repo{{ i }}-{{ k }}={{ v }}
 {% for k, v in pgbackrest_global_config.items() %}
 {{ k }}={{ v }}
 {% endfor %}
+spool-path={{ pgbackrest_spool_path }}
+{% if pgbackrest_async_archive | bool %}
+archive-async=y
+
+[global:archive-get]
+process-max={{ pgbackrest_async_archive_process_max }}
+
+[global:archive-push]
+process-max={{ pgbackrest_async_archive_process_max }}
+{% endif %}
 
 {% for stanza in pgbackrest_stanzas %}
 [{{ stanza.name }}]

@@ -1,10 +1,28 @@
 ---
 
+- name: Ensure archive-async is not in pgbackrest_global_config
+  fail:
+    msg: "Configure async archive with 'pgbackrest_async_archive' and remove it from 'pgbackrest_global_config'"
+  when: "'archive-async' in pgbackrest_global_config"
+
+- name: Ensure spool-path is not in pgbackrest_global_config
+  fail:
+    msg: "Configure spool path with 'pgbackrest_spool_path' and remove it from 'pgbackrest_global_config'"
+  when: "'spool-path' in pgbackrest_global_config"
+
 - name: Install pgbackrest
   yum:
     name: pgbackrest
     state: present
   tags: ["install"]
+
+- name: Ensure spool path exists
+  file:
+    path: "{{ pgbackrest_spool_path }}"
+    state: directory
+    owner: "{{ pgbackrest_owner }}"
+    group: "{{ pgbackrest_owner }}"
+    mode: 0700
 
 - name: Copy pgbackrest config
   template:

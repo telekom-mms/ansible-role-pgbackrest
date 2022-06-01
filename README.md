@@ -49,6 +49,9 @@ If using [Xait's postgres role](https://gitlab.xait.no/collab/xait_software_post
 - `pgbackrest_local_postgresql` set to `false` if pgbackrest host doesn't have PG installed locally.
 - `pgbackrest_timer_enabled` set to `false` if running on standby.
 - `pgbackrest_timer_random_delay` defaults to `0`, might be useful when backing up multiple repos simultaneously.
+- `pgbackrest_spool_path` defaults to `/var/spool/pgbackrest`
+- `pgbackrest_async_archive` set to `true` to enable [asynchronous archiving](https://pgbackrest.org/user-guide-rhel.html#async-archiving).
+- `pgbackrest_async_archive_process_max` sets the maximum number of parallel operations when async archive is enabled, defaults to `2`.
 - `pgbackrest_conf_extra` raw text that is added at the end of the config file.
 - `pgbackrest_global_config` mapping of options that will be added to the `[global]` section, defaults to
 
