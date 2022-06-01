@@ -1,9 +1,10 @@
 [Unit]
-Description=PgBackRest Backup Job For Stanza {{ name }} [{{ backup_type }}]
+Description=PgBackRest Backup Job For Stanza {{ name }} repo {{ repo }} [{{ backup_type }}]
 
 [Timer]
 OnCalendar={{ oncalendar }}
 Persistent=true
+RandomizedDelaySec={{ pgbackrest_timer_random_delay }}
 
 [Install]
 WantedBy=timers.target

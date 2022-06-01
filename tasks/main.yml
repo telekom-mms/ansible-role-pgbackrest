@@ -15,13 +15,10 @@
     mode: 0600
   notify: reconfigure pgbackrest
 
-- name: Configure services
-  template:
-    src: pgbackrest.service.j2
-    dest: "/etc/systemd/system/pgbackrest-{{ name }}-{{ backup_type }}.service"
-    owner: root
-    group: root
-    mode: 0644
+- name: Remove old services
+  file:
+    path: "/etc/systemd/system/pgbackrest-{{ name }}-{{ backup_type }}.service"
+    state: absent
   vars:
     name: "{{ item.0.name }}"
     backup_type: "{{ item.1.backup_type }}"
@@ -30,37 +27,20 @@
     label: "{{ name }} [{{ backup_type }}]"
   notify: reload systemd
 
-- name: Configure timers
-  template:
-    src: pgbackrest.timer.j2
-    dest: "/etc/systemd/system/pgbackrest-{{ name }}-{{ backup_type }}.timer"
-    owner: root
-    group: root
-    mode: 0644
+- name: Remove old timers
+  file:
+    path: "/etc/systemd/system/pgbackrest-{{ name }}-{{ backup_type }}.timer"
+    state: absent
   vars:
     name: "{{ item.0.name }}"
     backup_type: "{{ item.1.backup_type }}"
-    oncalendar: "{{ item.1.oncalendar }}"
   loop: "{{ pgbackrest_stanzas | subelements('schedules', skip_missing=True) }}"
   loop_control:
     label: "{{ name }} [{{ backup_type }}]"
-  register: __installed_timers
   notify: reload systemd
 
-- name: Flush handlers
-  meta: flush_handlers
-
-- name: Configure pgbackrest timers
-  systemd:
-    name: "{{ name }}"
-    state: "{{ 'started' if pgbackrest_timer_enabled else 'stopped' }}"
-    enabled: "{{ pgbackrest_timer_enabled }}"
-  vars:
-    # item.invocation.dest in check mode
-    name: "{{ item.dest | default(item.invocation.dest) | basename }}"
-  loop: "{{ __installed_timers.results }}"
+- name: Configure services and timers
+  include_tasks: config-services.yml
+  loop: "{{ range(1, pgbackrest_repos | length + 1) | list }}"
   loop_control:
-    label: "{{ name }}"
-  when:
-    - __installed_timers is defined
-    - item.dest is defined or item.invocation.dest is defined
+    loop_var: repo
