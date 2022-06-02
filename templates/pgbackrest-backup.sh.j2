@@ -1,16 +1,5 @@
 #!/bin/bash
 
-# Sleep a tiny amount on startup in case two (or more) processes attempt to run at the exact same time
-/usr/bin/env python3 -c "import random; import time; time.sleep(random.randint(100, 500)/1000)"
-
-LOCK_FILE="{{ pgbackrest_global_config.get('lock-path', '/tmp/pgbackrest') }}/{{ name}}-backup.lock"
-# Check and wait for lock to release
-while [[ -f "$LOCK_FILE" ]]; do
-    echo "Waiting for lock '$LOCK_FILE' to be released"
-    # Sleep a random time between 1 and 5 seconds
-    sleep $(( 1+RANDOM % 5 ))
-done
-
-# PgBackRest exists with code 50 if lock couldn't be acquired
-# https://github.com/pgbackrest/pgbackrest/blob/208641ac7fd22f676a55e7305b3e69df574f36f8/doc/lib/pgBackRestDoc/Common/Exception.pm#L49
-exec /usr/bin/pgbackrest --stanza={{ name }} --type={{ backup_type }} --repo={{ repo }} backup
+LOCK_FILE=/tmp/pgbackrest-backup.lock
+# Use flock to ensure only one pgbackrest backup runs at a time
+exec flock --verbose "$LOCK_FILE" /usr/bin/pgbackrest --stanza={{ name }} --type={{ backup_type }} --repo={{ repo }} backup
