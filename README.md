@@ -47,6 +47,7 @@ If using [Xait's postgres role](https://gitlab.xait.no/collab/xait_software_post
 
 - `pgbackrest_restore_standby` set to true to restore from a standby from the stanza with `recovery-option` set.
 - `pgbackrest_local_postgresql` set to `false` if pgbackrest host doesn't have PG installed locally.
+- `pgbackrest_services_install` set to `false` to skip installing backup services/timers.
 - `pgbackrest_timer_enabled` set to `false` if running on standby.
 - `pgbackrest_timer_random_delay` defaults to `0`, might be useful when backing up multiple repos simultaneously.
 - `pgbackrest_spool_path` defaults to `/var/spool/pgbackrest`

@@ -62,3 +62,4 @@
   loop: "{{ range(1, pgbackrest_repos | length + 1) | list }}"
   loop_control:
     loop_var: repo
+  when: pgbackrest_services_install | bool
