@@ -33,3 +33,13 @@ molecule:test-ol8:
     MOLECULE_OL_VERSION: "8"
   script:
     - molecule test
+
+molecule:test-ol8-2.12:
+  image: registry.xait.no/templates/ansible-role:2.12.5
+  tags:
+    - docker
+  stage: test
+  variables:
+    MOLECULE_OL_VERSION: "8"
+  script:
+    - molecule test

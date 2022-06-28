@@ -13,7 +13,8 @@
     - "'notest' not in ansible_skip_tags"
     - "'recovery-option' not in item.get('extra', {})"
 
-- block:
+- name: Restore standby from backup
+  block:
     - name: stop database
       listen: reconfigure pgbackrest
       systemd:
