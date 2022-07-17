@@ -1,4 +1,4 @@
-# xait_database_pgbackrest
+# Ansible role for setting up pgbackrest
 
 Installs and configures pgbackrest, PostgreSQL is assumed to already be installed.
 
@@ -11,14 +11,14 @@ Installs and configures pgbackrest, PostgreSQL is assumed to already be installe
 Install manually
 ```sh
 # If roles_path is set in ansible.cfg
-ansible-galaxy install git+ssh://gitlab.xait.no/ansible-roles/xait_database_pgbackrest.git
+ansible-galaxy install git+ssh://github.com/cosandr/ansible-role-pgbackrest.git
 # If not, assuming you want to install to ./roles
-ansible-galaxy install -p roles git+ssh://gitlab.xait.no/ansible-roles/xait_database_pgbackrest.git
+ansible-galaxy install -p roles git+ssh://github.com/cosandr/ansible-role-pgbackrest.git
 ```
 
 With requirements.yml
 ```yml
-- src: git@gitlab.xait.no:ansible-roles/xait_database_pgbackrest.git
+- src: https://github.com/cosandr/ansible-role-pgbackrest.git
   scm: git
 ```
 ```sh
@@ -164,7 +164,7 @@ This example is for a single server backed up to Azure blobs
           archive_mode = on
           max_wal_senders = 3
           wal_level = replica
-    - role: xait_database_pgbackrest
+    - role: pgbackrest
       vars:
         pgbackrest_repos:
           - path: "/atl-main"

@@ -40,4 +40,4 @@
       - host: "10.0.50.11"
         host-user: "postgres"
   roles:
-    - xait_database_pgbackrest
+    - pgbackrest
