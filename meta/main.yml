@@ -1,9 +1,5 @@
 ---
 
-dependencies:
-  - name: pg_repo
-    src: https://github.com/cosandr/ansible-role-pg_repo.git
-
 galaxy_info:
   role_name: pgbackrest
   namespace: xait
@@ -12,11 +8,6 @@ galaxy_info:
   company: Xait AS
 
   min_ansible_version: "2.9"
-
-  platforms:
-  - name: EL
-    versions:
-      - "8"
 
   license: license (BSD-3-Clause)
   galaxy_tags: []
