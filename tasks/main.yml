@@ -11,7 +11,7 @@
   when: "'spool-path' in pgbackrest_global_config"
 
 - name: Install pgbackrest
-  yum:
+  ansible.builtin.package:
     name: pgbackrest
     state: present
   tags: ["install"]
